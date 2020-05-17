@@ -13,26 +13,18 @@
 String host = "postman-echo.com";
 String url = "post";
 
-String ssid = "****";
-String password =  "****";
+String ssid = "xx";
+String password =  "xx";
 
 BlueDot_BME280 bme; //BME280 Sensor
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 SoftwareSerial esp(WIFI_RX_PIN, WIFI_TX_PIN);
 
-int displayOnFor = 10000;
-int displayTimer = 0;
-int displayToShow = 0;
-
-int sleepFor = 10; // Sleep 10ms between loops
-int sleepUpdateIterations = 500; //Update the sensors every 500 iterations
-
 float temp;
 float humidity;
 float pressure;
-
-int buttonPin = 8;
+String httpResponse = "000";
 
 void setup() {
   
@@ -44,15 +36,11 @@ void setup() {
 
   lcd.init(); 
   lcd.init();
-
-
   lcd.backlight();
   lcd.setCursor(1,0);
   lcd.print("Starting...");
   lcd.noBacklight();
   delay(1000);
-
-  pinMode(buttonPin, INPUT);
 
   Serial.println("Init temperature sensor");
   bme.parameter.communication = 0;
@@ -80,42 +68,6 @@ void updateTemps() {
   humidity  = bme.readHumidity();
   temp      = bme.readTempC();
   pressure  = bme.readPressure();
-}
-
-void showTemp(bool backlight) {
-  updateDisplay("Temperature", (String)temp, "C", backlight);
-}
-
-void showPressure(bool backlight) {
-  updateDisplay("Pressure", (String)pressure, "MPa", backlight);
-}
-
-void showHumidity(bool backlight) {
-  updateDisplay("Humidity", (String)humidity, "%", backlight);
-}
-
-void checkButton() {
-  
-  if(digitalRead(buttonPin) == LOW)
-  {
-    Serial.println("Button pushed");
-    Serial.println("Updating Temps");
-    displayToShow++;
-    displayTimer = displayOnFor;
-    int ds = displayToShow % 3;
-    switch(ds) {
-      case 0:
-        showPressure(true);
-        break;
-      case 1:
-        showHumidity(true);
-        break;
-      default:
-        showTemp(true);
-        break;
-    }
-        
-  }
 }
 
 void join() {
@@ -175,6 +127,8 @@ void sendData() {
   if(esp.find("SEND OK")) {
     Serial.println("Sent request OK");
   }
+
+  //Need some error handling here. If no response then this will probably loop forever.
   esp.find("+IPD,");
 
   int c = 0;
@@ -190,62 +144,46 @@ void sendData() {
   }
   Serial.println("' bytes");
 
-  for(int i=0; i<20000; i++) {
+  int charCount = 0;
+  static char response[15];
+  while(charCount < 15)
+  {
     c = esp.read();
     if(c != -1) {
-      Serial.print((char)c);
+      response[charCount] = c;
+      charCount++;
     }
   }
-  Serial.println("");
+  String respCode = (String)response[9] + (String)response[10] + (String)response[11];
+  Serial.println("Response Code is = " + respCode);
+  httpResponse = respCode;
+  updateDisplay();
   
   Serial.println("Closing connection");
   esp.println("AT+CIPCLOSE");
 }
 
-void updateDisplay(String label, String value, String unit, bool backlight) {
+void updateDisplay() {
   lcd.init();
-  lcd.clear();
-  
+  lcd.backlight();
   lcd.setCursor(0,0);
-  lcd.print(label + ":");
+
+  static char tempStr[15];
+  dtostrf(temp,4, 1, tempStr);
+  static char humidityStr[15];
+  dtostrf(humidity,4, 1, humidityStr);
+  static char pressureStr[15];
+  dtostrf(pressure,4, 1, pressureStr);
   
+  lcd.print("T:" + (String)tempStr + "C, H:"+ (String)humidityStr + "%");
   lcd.setCursor(0,1);
-  lcd.print(value + " " + unit);
-
-  if(backlight) {
-    lcd.backlight();
-  }
-  else {
-    lcd.noBacklight();
-  } 
+  lcd.print("P:" + (String)pressureStr + "MPa " + httpResponse);
 }
-
-void upDateDisplay() {
-  if(displayTimer > 0)
-  {
-    displayTimer -= sleepFor * sleepUpdateIterations;
-  }
-  else
-  {
-    showTemp(false);
-  }
-}
-
-int loopCount = 0;
 void loop() {
-  loopCount++;
-  checkButton();
-
-  if(loopCount % 500 == 0)
-  {
-    updateTemps();
-    upDateDisplay();
-    join();
-    sendData(); 
-  }
-
-
-  
+  updateTemps();
+  updateDisplay();
+  join();
+  sendData(); 
  
-  delay(10);
+  delay(1000);
 }

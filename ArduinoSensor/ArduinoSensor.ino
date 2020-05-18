@@ -24,7 +24,7 @@ String ssid = "";
 String password =  "";
 
 BlueDot_BME280 bme; //BME280 Sensor
-LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(LCD_ID,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 SoftwareSerial esp(WIFI_RX_PIN, WIFI_TX_PIN);
 

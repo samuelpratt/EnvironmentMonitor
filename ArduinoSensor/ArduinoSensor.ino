@@ -10,6 +10,11 @@
 
 #define SERIAL_SPEED 9600
 
+// Your board may be on 0x77 mine appears to be a knock off sensor. If in doubt use an I2C Scanner
+// e.g. https://github.com/RobTillaart/Arduino/tree/master/sketches/MultiSpeedI2CScanner
+#define BME280_ID  0x76
+#define LCD_ID  0x27
+
 String host = "postman-echo.com";
 String url = "post";
 
@@ -44,7 +49,7 @@ void setup() {
 
   Serial.println("Init temperature sensor");
   bme.parameter.communication = 0;
-  bme.parameter.I2CAddress = 0x77;
+  bme.parameter.I2CAddress = BME280_ID;
   bme.parameter.sensorMode = 0b11; 
   bme.parameter.IIRfilter = 0b100;
   bme.parameter.humidOversampling = 0b101;

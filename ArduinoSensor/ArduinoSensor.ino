@@ -10,7 +10,9 @@
 
 #define SERIAL_SPEED 9600
 
-// Your board may be on 0x77 mine appears to be a knock off sensor. If in doubt use an I2C Scanner
+// Your board may be on 0x77 it's changed using a soldered link on the
+// board (https://github.com/adafruit/Adafruit_BME280_Library/issues/15#issuecomment-296583253).
+// If in doubt use an I2C Scanner
 // e.g. https://github.com/RobTillaart/Arduino/tree/master/sketches/MultiSpeedI2CScanner
 #define BME280_ID  0x76
 #define LCD_ID  0x27
@@ -22,7 +24,7 @@ String ssid = "";
 String password =  "";
 
 BlueDot_BME280 bme; //BME280 Sensor
-LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(LCD_ID,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 SoftwareSerial esp(WIFI_RX_PIN, WIFI_TX_PIN);
 

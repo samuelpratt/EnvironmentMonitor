@@ -133,7 +133,6 @@ void sendData() {
   statusString = "POST";
   updateDisplay();
   String body = "POST /POST?temperature="+ (String)temp +"&pressure=" + (String)pressure + "&humidity=" + humidity + " HTTP/1.1\r\nHost: " + host;
-  Serial.println(body);
   int bodyLength = body.length() + 4;
 
   
@@ -175,7 +174,7 @@ void sendData() {
     }
   }
   String respCode = (String)response[9] + (String)response[10] + (String)response[11];
-  Serial.println("Response Code is = " + respCode);
+  Serial.println("Response Code is '" + respCode + "'");
   if(respCode == "200")
   {
     statusString = "OK";

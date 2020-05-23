@@ -1,9 +1,8 @@
   
-#include <Arduino_APDS9960.h>
 #include <Wire.h>
 #include "BlueDot_BME280.h"
-#include <LiquidCrystal_I2C.h>
 #include "SoftwareSerial.h"
+#include <U8x8lib.h>
 
 #define WIFI_RX_PIN 6
 #define WIFI_TX_PIN 7
@@ -13,7 +12,6 @@
 // Your board may be on 0x77 mine appears to be a knock off sensor. If in doubt use an I2C Scanner
 // e.g. https://github.com/RobTillaart/Arduino/tree/master/sketches/MultiSpeedI2CScanner
 #define BME280_ID  0x76
-#define LCD_ID  0x27
 
 String host = "postman-echo.com";
 String url = "post";
@@ -22,9 +20,8 @@ String ssid = "";
 String password =  "";
 
 BlueDot_BME280 bme; //BME280 Sensor
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
-
-SoftwareSerial esp(WIFI_RX_PIN, WIFI_TX_PIN);
+U8X8_SSD1306_128X64_NONAME_HW_I2C u8x8(U8X8_PIN_NONE); // SD1306 Screen
+SoftwareSerial esp(WIFI_RX_PIN, WIFI_TX_PIN); //WiFi module
 
 float temp;
 float humidity;
@@ -39,12 +36,9 @@ void setup() {
   esp.begin(SERIAL_SPEED);
   esp.setTimeout(10000);
 
-  lcd.init(); 
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(1,0);
-  lcd.print("Starting...");
-  lcd.noBacklight();
+  u8x8.begin();
+  u8x8.setFont(u8x8_font_px437wyse700a_2x2_r);
+  u8x8.drawString(0,0,"Starting");
   delay(1000);
 
   Serial.println("Init temperature sensor");
@@ -60,7 +54,7 @@ void setup() {
   bme.parameter.tempOutsideFahrenheit = 59;
   if (bme.init() != 0x60)
   {
-    Serial.println(F("BME280 Sensor not found!"));
+    Serial.println(F("BME280 not found"));
   }
 
   Serial.println("Finished init");
@@ -69,19 +63,18 @@ void setup() {
 }
 
 void updateTemps() {
-  Serial.println("Updating Temps");
   statusString = "Temp";
-  updateDisplay();
+  updateStatusDisplay();
   humidity  = bme.readHumidity();
   temp      = bme.readTempC();
   pressure  = bme.readPressure();
-  updateDisplay();
+  updateTempDisplay();
 }
 
 void join() {
 
   statusString = "RST";
-  updateDisplay();
+  updateStatusDisplay();
   Serial.println("Reseting WiFi");
   esp.println("AT+RST");
   if(esp.find("ready")) {
@@ -96,7 +89,7 @@ void join() {
   Serial.println("");
 
   statusString = "STN";
-  updateDisplay();
+  updateStatusDisplay();
   Serial.println("Setting Station Mode");
   esp.println("AT+CWMODE=1");
   if(esp.find("OK")) {
@@ -104,7 +97,7 @@ void join() {
   }
 
   statusString = "JOIN";
-  updateDisplay();
+  updateStatusDisplay();
   Serial.println("Joining WiFi");
   String join = "AT+CWJAP=\"" + ssid + "\",\"" + password + "\"";
   esp.println(join);
@@ -115,43 +108,57 @@ void join() {
 
 void sendData() {
   statusString = "STRT";
-  updateDisplay();
-  esp.println("Seting connection multiplex off");
+  updateStatusDisplay();
+  esp.println("Seting conn multiplex off");
   esp.println("AT+CIPMUX=0");
   if(esp.find("OK")) {
     Serial.println("Mux Set to 0");
   }
 
   statusString = "CONN";
-  updateDisplay();
-  Serial.println("Connecting to host " + host);
+  updateStatusDisplay();
+  Serial.println("Connecting to " + host);
   esp.println("AT+CIPSTART=\"TCP\",\""+ host + "\",80");
   if(esp.find("OK")) {
     Serial.println("Connected to " + host);
   }
 
   statusString = "POST";
-  updateDisplay();
+  updateStatusDisplay();
   String body = "POST /POST?temperature="+ (String)temp +"&pressure=" + (String)pressure + "&humidity=" + humidity + " HTTP/1.1\r\nHost: " + host;
   int bodyLength = body.length() + 4;
 
   
   esp.println("AT+CIPSEND=" + (String)bodyLength);
   if(esp.find("OK")) {
-    Serial.println("OK to send");
+    Serial.println("OK to snd");
   }
   delay(1000);
   esp.println(body);
   esp.println("");
   if(esp.find("SEND OK")) {
-    Serial.println("Sent request OK");
+    Serial.println("Sent req OK");
   }
 
-  //Need some error handling here. If no response then this will probably loop forever.
-  esp.find("+IPD,");
 
-  int c = 0;
+
+  //Need some error handling here. If no response then this will probably loop forever.
+  delay(1000);
+  Serial.println("Waiting");
+
+  int c = -1;
+  while(true) {
+    c = esp.read();
+    //Looking for the ',' at the end of "+IDP,"
+    if(c == ',') {
+      break;
+    }
+  }
+  
+  //esp.find("+IPD,");
   Serial.print("Got '");
+
+  //int c = 0;
   while(true) {
     c = esp.read();
     if((char)c == ':') {
@@ -183,34 +190,51 @@ void sendData() {
   {
     statusString = respCode;
   }
-  updateDisplay();
+  updateStatusDisplay();
   
   Serial.println("Closing connection");
   esp.println("AT+CIPCLOSE");
 }
 
-void updateDisplay() {
-  lcd.init();
-  lcd.backlight();
-  lcd.setCursor(0,0);
-
-  static char tempStr[15];
-  dtostrf(temp,4, 1, tempStr);
-  static char humidityStr[15];
-  dtostrf(humidity,4, 1, humidityStr);
-  static char pressureStr[15];
-  dtostrf(pressure,4, 1, pressureStr);
+void updateTempDisplay() {
+  static char buffer[20];
+  u8x8.setFont(u8x8_font_px437wyse700a_2x2_r);
   
-  lcd.print("T:" + (String)tempStr + "C, H:"+ (String)humidityStr + "%");
-  lcd.setCursor(0,1);
-  lcd.print("P:" + (String)pressureStr + "MPa " + statusString);
+  dtostrf(temp,4, 1, buffer);
+  ("T:" + (String)buffer + "C").toCharArray(buffer, 20);
+  u8x8.clearLine(0);
+  u8x8.clearLine(1);
+  u8x8.drawString(0,0, buffer);
+
+  dtostrf(humidity,4, 1, buffer);
+  ("H:" + (String)buffer + "%").toCharArray(buffer, 20);
+  u8x8.clearLine(2);
+  u8x8.clearLine(3);
+  u8x8.drawString(0,2, buffer);
+
+  u8x8.clearLine(4);
+  u8x8.clearLine(5);
+  dtostrf(pressure,4, 1, buffer);
+  ("P:" + (String)buffer).toCharArray(buffer, 20);
+  u8x8.drawString(0,4, buffer);
 }
+
+void updateStatusDisplay() {  
+  static char buffer[20];
+  u8x8.setFont(u8x8_font_px437wyse700a_2x2_r);
+  statusString.toCharArray(buffer, 20);
+  u8x8.clearLine(6);
+  u8x8.clearLine(7);
+  u8x8.drawString(0,6, buffer);
+}
+
 void loop() {
   updateTemps();
   join();
   sendData(); 
 
-  statusString = "Zzzz";
-  updateDisplay();
-  delay(1000);
+  Serial.println("Speeping");
+  statusString = "";
+  updateStatusDisplay();
+  delay(20000);
 }

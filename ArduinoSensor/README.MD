@@ -29,14 +29,6 @@ An Arduino nano. This is connected to the following: -
 * Dupont wires for the display: https://www.amazon.co.uk/gp/product/B08151TQHG
 * 3 x 220ohm resistors https://uk.rs-online.com/web/p/through-hole-fixed-resistors/0148348/
 
-# What does this look like?
-
-Raw board: -
-<img src="./board.jpg">
-
-Built Up and working: -
-<img src="./built.jpg">
-
 # What did I learn / what would I do differently?
 
 ## Regulator Design
@@ -56,3 +48,18 @@ The temp sensor in the BME280 isn't very accurate. This is because it mainly exi
 # Voltage Conversion
 
 Altough the resistors work for the 5v -> 3.3v conversion on the Arduino TX -> ESP-01 RX a better solution would be to use a way level converter IC.
+
+# What does this look like?
+
+Design in Fritzing: -
+<img src="./fritzing.png">
+
+Raw board: -
+<img src="./board.jpg">
+
+Built Up and working: -
+<img src="./built.jpg">
+
+# Why are there no hold up resistors on the I2C lines?
+
+There are some integrated into the BME280 board I used.

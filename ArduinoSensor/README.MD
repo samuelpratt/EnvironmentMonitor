@@ -4,6 +4,12 @@ A custom PCB to form the basis of a Mini Weather station that can upload to the 
 
 This will upload to a Cloud Solution
 
+# Where did you get it made?
+
+The board was manufactured via Aisler in Germany. It took about a week from ordering to delivery and cost approx. £22.
+
+https://aisler.net/
+
 # Contents: -
 
 An Arduino nano. This is connected to the following: -
@@ -44,6 +50,10 @@ You can get Nano style development boards with i2c and GPIO pins (https://www.am
 ## Temp Sensor
 
 The temp sensor in the BME280 isn't very accurate. This is because it mainly exists to assist the humidity sensor. Mine read consistantly ~1.5 deg above true temperature. If I did this again I would use a seperate dedicated analogue sensor.
+
+## Mounting Holes
+
+I forgot to put any on the board when it was manufactured. I will have to drill some myself to mount it.
 
 # Voltage Conversion
 

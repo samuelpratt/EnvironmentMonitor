@@ -16,7 +16,15 @@ An Arduino nano. This is connected to the following: -
 
 # What do I need to build this?
 
-# What did I learn / what would i do differently?
+# What does this look like?
+
+Raw board: -
+<img src="./board.jpg">
+
+Built Up and working: -
+<img src="./built.jpg">
+
+# What did I learn / what would I do differently?
 
 ## Regulator Design
 

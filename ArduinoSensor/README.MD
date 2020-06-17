@@ -13,7 +13,7 @@ https://aisler.net/
 # Contents: -
 
 An Arduino nano. This is connected to the following: -
-* A Serial connection to an ESP-01 Wifi Module
+* A Serial connection to an ESP-01/ESP8266 Wifi Module
 * An i2c connection to a BME280 Sensor
 * An i2c connection to an OLED display
 * 2 x Regulators to bring the 9v input down to: -
@@ -25,6 +25,7 @@ An Arduino nano. This is connected to the following: -
 * Arduino Nano: https://www.amazon.co.uk/gp/product/B072BMYZ18
 * BME280 board: https://www.amazon.co.uk/gp/product/B07KY8WY4M
 * Generic Mini I2C 128x64 OLED Display with a SSD1306 controller: https://www.amazon.co.uk/gp/product/B076PNP2VD
+* ESP-01 WiFi Module: https://www.amazon.co.uk/gp/product/B06XP74C81
 * LD1117v50: https://uk.rs-online.com/web/p/low-dropout-voltage-regulators/6869760/
 * LD1117v33: https://uk.rs-online.com/web/p/low-dropout-voltage-regulators/4384885/?sra=pmpn
 * 10uF Capacitor x 2: https://uk.rs-online.com/web/p/aluminium-capacitors/4758848

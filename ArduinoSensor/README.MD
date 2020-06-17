@@ -71,6 +71,6 @@ Raw board: -
 Built Up and working: -
 <img src="./built.jpg">
 
-# Why are there no hold up resistors on the I2C lines?
+# Why are there no pull-up resistors on the I2C lines?
 
 There are some integrated into the BME280 board I used.

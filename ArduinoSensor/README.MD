@@ -17,8 +17,8 @@ An Arduino nano. This is connected to the following: -
 * An i2c connection to a BME280 Sensor
 * An i2c connection to an OLED display
 * 2 x Regulators to bring the 9v input down to: -
-** 5v for the Temp Sensor and display
-** 3.3v for the ESP-01
+  * 5v for the Temp Sensor and display
+  * 3.3v for the ESP-01
 
 # What do I need to build this?
 
@@ -28,6 +28,7 @@ An Arduino nano. This is connected to the following: -
 * ESP-01 WiFi Module: https://www.amazon.co.uk/gp/product/B06XP74C81
 * LD1117v50: https://uk.rs-online.com/web/p/low-dropout-voltage-regulators/6869760/
 * LD1117v33: https://uk.rs-online.com/web/p/low-dropout-voltage-regulators/4384885/?sra=pmpn
+* Heatsinks for the LD1117 modules: https://www.amazon.co.uk/gp/product/B081GS15N6
 * 10uF Capacitor x 2: https://uk.rs-online.com/web/p/aluminium-capacitors/4758848
 * 100nf Capacitor x 2: https://uk.rs-online.com/web/p/aluminium-capacitors/8624146/
 * 9V Connector: https://uk.rs-online.com/web/p/dc-power-connectors/1631836/
